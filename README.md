@@ -74,34 +74,3 @@ La palabra se elige con un hash de `idioma:AAAA-MM-DD`, de modo que es determini
 Antes de aceptar un intento se consulta el Wikcionario (`es.wiktionary.org` o `en.wiktionary.org`), incluyendo variantes con tilde y `ñ` en español. Si esa consulta falla por red, **la palabra se acepta** para no bloquear la partida.
 
 Si `/api/palabra` no responde, el cliente descarga las listas directamente desde GitHub y calcula la palabra con el mismo algoritmo.
-
-## Desarrollo local
-
-La forma recomendada, porque ejecuta también la función serverless:
-
-```bash
-npx vercel dev
-```
-
-Con un servidor estático cualquiera la página funciona igual, pero `/api/palabra` no existirá y el cliente usará la descarga directa de las listas.
-
-## Despliegue en Vercel
-
-1. **Add New → Project → Import Git Repository** y elige este repositorio.
-2. Framework Preset: **Other**.
-3. Build Command: **vacío**.
-4. Output Directory: **vacío**.
-5. **Deploy**.
-
-No hay variables de entorno ni pasos de compilación.
-
-Comprobación rápida tras el despliegue:
-
-```
-https://TU-PROYECTO.vercel.app/api/palabra?lang=es
-https://TU-PROYECTO.vercel.app/api/palabra?lang=en
-```
-
-## Privacidad
-
-Sin analítica, sin cookies y sin cuentas. Solo se guardan en `localStorage` el tema (`cinco-theme`) y el idioma (`cinco-lang`).
