@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f1e8">
+  <meta name="description" content="Juego de palabras en español e inglés: adivina una palabra oculta de cinco letras en seis intentos. Palabra nueva cada día.">
+  <title>Adivina la palabra · Juego de palabras</title>
+
+  <script>
+    (() => {
+      try {
+        const guardado = localStorage.getItem("cinco-theme");
+        const prefiereOscuro = window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const tema = guardado === "light" || guardado === "dark"
+          ? guardado
+          : (prefiereOscuro ? "dark" : "light");
+        document.documentElement.dataset.theme = tema;
+      } catch (error) {
+        document.documentElement.dataset.theme = "light";
+      }
+    })();
+  </script>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app" aria-labelledby="game-title">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" id="attemptBadge" data-state="green" aria-label="6 intentos restantes">6</div>
+        <h1 id="game-title" data-i18n="encabezado">Adivina la palabra</h1>
+      </div>
+
+      <div class="top-actions">
+        <button
+          class="lang-toggle"
+          id="langToggle"
+          type="button"
+          aria-label="Cambiar a inglés"
+          title="Cambiar a inglés"
+        >
+          <svg class="flag flag-en" id="flagEnglish" viewBox="0 0 60 36" aria-hidden="true" focusable="false">
+            <rect width="60" height="36" fill="#012169"></rect>
+            <path d="M0 0l60 36M60 0L0 36" stroke="#ffffff" stroke-width="9"></path>
+            <path d="M0 0l60 36M60 0L0 36" stroke="#C8102E" stroke-width="4.5"></path>
+            <path d="M30 0v36M0 18h60" stroke="#ffffff" stroke-width="13"></path>
+            <path d="M30 0v36M0 18h60" stroke="#C8102E" stroke-width="7"></path>
+          </svg>
+          <svg class="flag flag-es" id="flagSpanish" viewBox="0 0 60 36" aria-hidden="true" focusable="false" hidden>
+            <rect width="60" height="36" fill="#AA151B"></rect>
+            <rect y="9" width="60" height="18" fill="#F1BF00"></rect>
+          </svg>
+        </button>
+
+        <button
+          class="theme-toggle"
+          id="themeToggle"
+          type="button"
+          aria-label="Activar modo oscuro"
+          aria-pressed="false"
+          title="Activar modo oscuro"
+        >
+          <svg class="theme-icon theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"></path>
+          </svg>
+          <svg class="theme-icon theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2"></path>
+            <path d="M12 20v2"></path>
+            <path d="M4.93 4.93l1.42 1.42"></path>
+            <path d="M17.66 17.66l1.41 1.41"></path>
+            <path d="M2 12h2"></path>
+            <path d="M20 12h2"></path>
+            <path d="M6.34 17.66l-1.41 1.41"></path>
+            <path d="M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="game-card" id="gameCard" aria-label="Juego de palabras" aria-busy="true">
+      <p class="status" id="message" role="status" aria-live="polite">
+        Cargando palabras…
+      </p>
+
+      <div class="board" id="board" role="grid" aria-label="Tablero de 6 intentos y 5 letras"></div>
+
+      <div class="keyboard" id="keyboard" aria-label="Teclado en pantalla"></div>
+
+      <button class="new-word-btn" id="newWordBtn" type="button">Jugar otra palabra</button>
+    </section>
+
+    <footer class="footer">
+      <div class="share" id="share" hidden>
+        <button
+          class="share-btn"
+          id="shareBtn"
+          type="button"
+          aria-label="Compartir resultado"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="shareMenu"
+          title="Compartir resultado"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <path d="M8.6 10.7l6.8-3.9M8.6 13.3l6.8 3.9"></path>
+          </svg>
+        </button>
+
+        <div class="share-menu" id="shareMenu" role="group" aria-label="Opciones para compartir">
+          <a
+            class="share-option whatsapp"
+            id="shareWhatsapp"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.23 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.23.25-.86.85-.86 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.22-.17-.47-.29Z"></path>
+            </svg>
+            <span>WhatsApp</span>
+          </a>
+
+          <a
+            class="share-option telegram"
+            id="shareTelegram"
+            href="#"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M21.9 4.3 18.6 19c-.2 1.1-.9 1.4-1.8.9l-5-3.7-2.4 2.3c-.3.3-.5.5-1 .5l.4-5.1 9.3-8.4c.4-.4-.1-.6-.6-.2L6.1 12.1l-4.9-1.5c-1.1-.3-1.1-1.1.2-1.6l19-7.3c.9-.3 1.7.2 1.4 1.6Z"></path>
+            </svg>
+            <span>Telegram</span>
+          </a>
+
+          <button class="share-option copy" id="shareCopy" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <rect x="9" y="9" width="12" height="12" rx="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span data-i18n="compartirCopiar">Copiar resultado</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="legend" aria-label="Leyenda de colores">
+        <span class="legend-item"><span class="legend-chip correct"></span><span data-i18n="leyendaCorrecta">Correcta</span></span>
+        <span class="legend-item"><span class="legend-chip present"></span><span data-i18n="leyendaPresente">Mal ubicada</span></span>
+        <span class="legend-item"><span class="legend-chip absent"></span><span data-i18n="leyendaAusente">No está</span></span>
+      </div>
+      <p class="footnote" data-i18n="pie">6 intentos · Palabra nueva cada día a las 00:00 (hora peninsular)</p>
+    </footer>
+  </main>
+
+  <script src="juego.js"></script>
+</body>
+</html>
