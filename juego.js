@@ -269,11 +269,11 @@ function aplicarIdioma() {
   restartBtn.setAttribute("title", t.reiniciar);
 
   if (idiomaActual === "es") {
-    flagEnglish.removeAttribute("hidden");
-    flagSpanish.setAttribute("hidden", "");
-  } else {
-    flagEnglish.setAttribute("hidden", "");
     flagSpanish.removeAttribute("hidden");
+    flagEnglish.setAttribute("hidden", "");
+  } else {
+    flagSpanish.setAttribute("hidden", "");
+    flagEnglish.removeAttribute("hidden");
   }
 
   newWordBtn.textContent = modoError ? t.reintentar : t.reiniciar;
