@@ -264,7 +264,8 @@ h1 {
 }
 
 .theme-toggle,
-.lang-toggle {
+.lang-toggle,
+.restart-btn {
   width: 42px;
   height: 42px;
   flex: 0 0 auto;
@@ -286,14 +287,34 @@ h1 {
 }
 
 .theme-toggle:hover,
-.lang-toggle:hover {
+.lang-toggle:hover,
+.restart-btn:hover {
   background: var(--toggle-hover);
   transform: translateY(-1px);
 }
 
 .theme-toggle:active,
-.lang-toggle:active {
+.lang-toggle:active,
+.restart-btn:active {
   transform: translateY(0);
+}
+
+.restart-btn[hidden] {
+  display: none;
+}
+
+.restart-btn {
+  animation: fade-up 0.22s ease both;
+}
+
+.restart-btn svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .theme-toggle .theme-icon {
@@ -467,7 +488,7 @@ h1 {
 }
 
 .tile.flip {
-  animation: flip 1.1s cubic-bezier(0.45, 0, 0.55, 1) both;
+  animation: flip 0.62s cubic-bezier(0.45, 0, 0.55, 1) both;
 }
 
 .row.shake {
@@ -553,6 +574,7 @@ h1 {
 .key:focus-visible,
 .theme-toggle:focus-visible,
 .lang-toggle:focus-visible,
+.restart-btn:focus-visible,
 .new-word-btn:focus-visible,
 .share-btn:focus-visible,
 .share-option:focus-visible {
@@ -917,7 +939,8 @@ h1 {
   }
 
   .theme-toggle,
-  .lang-toggle {
+  .lang-toggle,
+  .restart-btn {
     width: 38px;
     height: 38px;
   }

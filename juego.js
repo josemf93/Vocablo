@@ -44,6 +44,7 @@ const badgeEl = document.getElementById("attemptBadge");
 const newWordBtn = document.getElementById("newWordBtn");
 const gameCard = document.getElementById("gameCard");
 const themeToggle = document.getElementById("themeToggle");
+const restartBtn = document.getElementById("restartBtn");
 const langToggle = document.getElementById("langToggle");
 const flagEnglish = document.getElementById("flagEnglish");
 const flagSpanish = document.getElementById("flagSpanish");
@@ -264,6 +265,8 @@ function aplicarIdioma() {
   shareBtn.setAttribute("aria-label", t.compartir);
   shareBtn.setAttribute("title", t.compartir);
   shareMenu.setAttribute("aria-label", t.compartirMenu);
+  restartBtn.setAttribute("aria-label", t.reiniciar);
+  restartBtn.setAttribute("title", t.reiniciar);
 
   if (idiomaActual === "es") {
     flagEnglish.removeAttribute("hidden");
@@ -615,6 +618,7 @@ function limpiarTablero() {
   });
 
   newWordBtn.classList.remove("show");
+  ocultarReinicio();
   ocultarCompartir();
 }
 
@@ -643,6 +647,14 @@ function actualizarBadge() {
   badgeEl.dataset.state =
     restantes >= 5 ? "green" : restantes >= 3 ? "orange" : "red";
   badgeEl.setAttribute("aria-label", textos().intentosRestantes(restantes));
+}
+
+function mostrarReinicio() {
+  restartBtn.hidden = false;
+}
+
+function ocultarReinicio() {
+  restartBtn.hidden = true;
 }
 
 function etiquetaCelda(fila, columna, letra) {
@@ -783,8 +795,8 @@ function sacudirFila(fila) {
 }
 
 function revelarIntento(fila, intento, estados, gen) {
-  const RETRASO_ENTRE_LETRAS = 250;
-  const DURACION_VUELTA = 1100;
+  const RETRASO_ENTRE_LETRAS = 130;
+  const DURACION_VUELTA = 620;
   const MITAD_VUELTA = Math.round(DURACION_VUELTA / 2);
 
   let ultimoCambio = 0;
@@ -814,7 +826,7 @@ function revelarIntento(fila, intento, estados, gen) {
   window.setTimeout(() => {
     if (gen !== generacion) return;
     finalizarIntento(intento, gen);
-  }, ultimoCambio + MITAD_VUELTA + 250);
+  }, ultimoCambio + MITAD_VUELTA + 200);
 }
 
 function variantesConTildes(palabra) {
@@ -896,7 +908,7 @@ async function comprobarIntento() {
   }
 
   if (juegoTerminado) {
-    if (!revelando && newWordBtn.classList.contains("show")) {
+    if (!revelando && !restartBtn.hidden) {
       nuevaRonda();
     }
     return;
@@ -959,16 +971,18 @@ function finalizarIntento(intento, gen) {
   if (intento === palabraSecreta) {
     juegoTerminado = true;
     actualizarMensaje(t.correcto(palabraSecreta), "success");
-    newWordBtn.classList.add("show");
     mostrarCompartir();
+    mostrarReinicio();
+    desplazarACompartir();
     return;
   }
 
   if (intentos.length >= MAX_INTENTOS) {
     juegoTerminado = true;
     actualizarMensaje(t.agotado(palabraSecreta), "warn");
-    newWordBtn.classList.add("show");
     mostrarCompartir();
+    mostrarReinicio();
+    desplazarACompartir();
     return;
   }
 
@@ -1052,6 +1066,24 @@ function mostrarCompartir() {
   }, 5600);
 }
 
+function desplazarACompartir() {
+  const reducido =
+    window.matchMedia &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // Se espera a que el pie de página aparezca y se asiente el diseño.
+  window.setTimeout(() => {
+    if (shareEl.hidden) {
+      return;
+    }
+
+    shareEl.scrollIntoView({
+      behavior: reducido ? "auto" : "smooth",
+      block: "center"
+    });
+  }, 240);
+}
+
 function ocultarCompartir() {
   shareEl.hidden = true;
   cerrarMenuCompartir();
@@ -1116,7 +1148,9 @@ function manejarTeclaFisica(event) {
     if (
       event.target === newWordBtn ||
       event.target === themeToggle ||
-      event.target === langToggle
+      event.target === langToggle ||
+      event.target === restartBtn ||
+      event.target === shareBtn
     ) {
       return;
     }
@@ -1197,6 +1231,20 @@ newWordBtn.addEventListener("click", () => {
   } else {
     nuevaRonda();
   }
+});
+
+restartBtn.addEventListener("click", () => {
+  if (modoError) {
+    cargarPalabraDelDia();
+    return;
+  }
+
+  if (!juegoTerminado || revelando || validando) {
+    return;
+  }
+
+  nuevaRonda();
+  restartBtn.blur();
 });
 
 window.addEventListener("keydown", manejarTeclaFisica);
